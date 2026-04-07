@@ -426,30 +426,7 @@
     display: flex; align-items: flex-end; padding: 1.5rem;
   }
   .gallery-item:hover .gallery-overlay { opacity: 1; }
-  .gallery-item.playing .gallery-overlay { opacity: 1; }
   .gallery-overlay-text { font-weight: 700; font-size: 0.9rem; color: #fff; }
-
-  /* ── MOBILE PLAY BUTTON ── */
-  .mobile-play-btn {
-    position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    background: rgba(8,8,16,0.35);
-    transition: opacity 0.3s;
-    pointer-events: none;
-  }
-  .mobile-play-circle {
-    width: 64px; height: 64px; border-radius: 50%;
-    background: linear-gradient(135deg, #ff2d78, #9b30ff);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.4rem; color: #fff;
-    box-shadow: 0 0 30px rgba(255,45,120,0.6);
-    padding-left: 5px;
-  }
-  .gallery-item.playing .mobile-play-btn { opacity: 0; }
-  /* Ocultar en desktop (dispositivos con hover real) */
-  @media (hover: hover) and (pointer: fine) {
-    .mobile-play-btn { display: none !important; }
-  }
 
   /* VIDEO MODAL */
   .video-modal {
@@ -1231,10 +1208,6 @@ const galleryItems = [
   }
 
 ];
-function isMobile() {
-  return window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-}
-
 function renderGallery(){
 
   const grid = document.getElementById('galleryGrid');
@@ -1262,54 +1235,18 @@ function renderGallery(){
         <span class="gallery-overlay-text">${item.label}</span>
       </div>
 
-      <div class="mobile-play-btn" aria-label="Reproducir video">
-        <div class="mobile-play-circle">▶</div>
-      </div>
-
     `;
 
     const video = el.querySelector('video');
-    const playBtn = el.querySelector('.mobile-play-btn');
 
-    if (isMobile()) {
-      // MÓVIL: tap para reproducir, tap de nuevo para pausar
-      el.addEventListener('click', () => {
-        if (video.paused) {
-          // Pausar todos los otros videos primero
-          document.querySelectorAll('.gallery-item video').forEach(v => {
-            if (v !== video) {
-              v.pause();
-              v.currentTime = 0;
-              v.closest('.gallery-item').classList.remove('playing');
-            }
-          });
-          video.play().catch(()=>{});
-          el.classList.add('playing');
-        } else {
-          video.pause();
-          video.currentTime = 0;
-          el.classList.remove('playing');
-        }
-      });
+    el.addEventListener('mouseenter', () => {
+      video.play().catch(()=>{});
+    });
 
-      video.addEventListener('ended', () => {
-        el.classList.remove('playing');
-        video.currentTime = 0;
-      });
-
-    } else {
-      // DESKTOP: hover para reproducir
-      playBtn.style.display = 'none';
-
-      el.addEventListener('mouseenter', () => {
-        video.play().catch(()=>{});
-      });
-
-      el.addEventListener('mouseleave', () => {
-        video.pause();
-        video.currentTime = 0;
-      });
-    }
+    el.addEventListener('mouseleave', () => {
+      video.pause();
+      video.currentTime = 0;
+    });
 
     grid.appendChild(el);
 
